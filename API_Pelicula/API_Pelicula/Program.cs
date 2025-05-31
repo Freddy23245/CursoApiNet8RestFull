@@ -2,6 +2,7 @@ using API_Pelicula.Data;
 using API_Pelicula.PeliculaMappers;
 using API_Pelicula.Repositorio;
 using API_Pelicula.Repositorio.IRepositorio;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,23 @@ builder.Services.AddScoped<IPeliculasRepositorio, PeliculasRepositorio>();
 builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
 
 var key = builder.Configuration.GetValue<string>("ApiSettings:Secreta");
+
+//Soporte para Versionamiento
+
+var ApiVersioningBuilder = builder.Services.AddApiVersioning(options =>
+{
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.ReportApiVersions = true;
+    //options.ApiVersionReader = ApiVersionReader.Combine(
+    //    new QueryStringApiVersionReader("api-version"));
+});
+ApiVersioningBuilder.AddApiExplorer(opciones =>
+{
+    opciones.GroupNameFormat = "'v'VVV";
+    opciones.SubstituteApiVersionInUrl = true;
+});
+
 //Agregamos el AutoMapper
 builder.Services.AddAutoMapper(typeof(PeliculasMapper));
 // aqui se configura la autenticacion
@@ -50,8 +68,8 @@ builder.Services.AddAuthentication
 //perfil Global
 builder.Services.AddControllers(options =>
 {
-//cache profile cahce global asi no tener que ponerlo en todos lados
-options.CacheProfiles.Add("PorDefecto20Segundos", new CacheProfile(){ Duration = 20 });
+    //cache profile cahce global asi no tener que ponerlo en todos lados
+    options.CacheProfiles.Add("PorDefecto20Segundos", new CacheProfile() { Duration = 20 });
 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -83,6 +101,39 @@ builder.Services.AddSwaggerGen(options =>
         }
 
     });
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1.0",
+        Title = "Peliculas Api V1",
+        Description = "Api de Peliculas",
+        //TermsOfService = new Uri("URL"),
+        //Contact = new OpenApiContact
+        //{
+        //    Name = "Nombre web",
+        //    Url = new Uri("URL")
+        //},
+        //License = new OpenApiLicense { 
+        //    Name = "Licencia Personal",
+        //    Url = new Uri("URL")
+        //}
+    }
+     );
+    options.SwaggerDoc("v2", new OpenApiInfo
+    {
+        Version = "v2.0",
+        Title = "Peliculas Api V2",
+        Description = "Api de Peliculas Version 2",
+        //TermsOfService = new Uri("URL"),
+        //Contact = new OpenApiContact
+        //{
+        //    Name = "Nombre web",
+        //    Url = new Uri("URL")
+        //},
+        //License = new OpenApiLicense { 
+        //    Name = "Licencia Personal",
+        //    Url = new Uri("URL")
+        //}
+    });
 });
 
 builder.Services.AddCors(p => p.AddPolicy("PoliticaCors", build =>
@@ -101,7 +152,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(opciones =>
+    {
+        opciones.SwaggerEndpoint("/swagger/v1/swagger.json", "ApiPeliculasV1");
+        opciones.SwaggerEndpoint("/swagger/v2/swagger.json", "ApiPeliculasV2");
+    });
 }
 
 app.UseHttpsRedirection();

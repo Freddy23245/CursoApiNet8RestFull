@@ -1,6 +1,7 @@
 ﻿using API_Pelicula.Models;
 using API_Pelicula.Models.Dtos;
 using API_Pelicula.Repositorio.IRepositorio;
+using Asp.Versioning;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +12,7 @@ namespace API_Pelicula.Controllers
 {
     //[Authorize(Roles ="Admin")] bloquea todos los metodos de la clase
     //[ResponseCache(Duration =20)]
-    [Route("api/[controller]")]
+    [Route("api/v{version:ApiVersion}/[controller]")]
     [ApiController]
     public class CategoriasController : ControllerBase
     {
@@ -32,6 +33,10 @@ namespace API_Pelicula.Controllers
         [ResponseCache(CacheProfileName = "PorDefecto20Segundos")] 
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]
+       // [ApiVersion("1.0")]//si se especifica por ej 2.0 no funcionaria este endpoint
+        //[ApiVersion("2.0")] //ahora soportaria verion 1.0 y2.0
+        [ApiVersionNeutral]// no depende de ninguna version
+        //[Obsolete("Este endopoint esta obsoleto")] marca al endpoint como obsoleto y lo descativa
         public IActionResult GetCategorias() 
         { 
             var ListaCategorias = _catRepositorio.GetCategorias();
