@@ -5,11 +5,11 @@ namespace API_Pelicula.Repositorio.IRepositorio
 {
     public interface IUsuarioRepositorio
     {
-        ICollection<Usuarios> GetUsuarios();
-        Usuarios GetUsuariosId(int id);
+        ICollection<AppUsuarios> GetUsuarios();
+        AppUsuarios GetUsuariosId(string id);
         bool IsUniqueUser(string usuarioNombre);
         Task<UsuarioLoginRespuestaDto> Login(UsuarioLoginDto usuario);
-        Task<Usuarios> Registro(UsuarioRegistroDto usuario);
+        Task<UsuarioDatosDto> Registro(UsuarioRegistroDto usuario);
         bool Guardar();
     }
 }

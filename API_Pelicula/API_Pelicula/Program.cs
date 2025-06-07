@@ -1,9 +1,11 @@
 using API_Pelicula.Data;
+using API_Pelicula.Models;
 using API_Pelicula.PeliculaMappers;
 using API_Pelicula.Repositorio;
 using API_Pelicula.Repositorio.IRepositorio;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -16,6 +18,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(
     opciones => opciones.UseSqlServer(builder.Configuration.GetConnectionString("Conexion")));
+
+//Soporte autenticacion Identity, se agrega el AppUsuario por que hereda de IdentityUser
+builder.Services.AddIdentity<AppUsuarios, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
 
 //Soporte par cache
 builder.Services.AddResponseCaching();

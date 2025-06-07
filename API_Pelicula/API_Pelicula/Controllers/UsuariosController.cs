@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API_Pelicula.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     [Route("api/Usuarios")]
     [ApiController]
     public class UsuariosController : ControllerBase
@@ -25,19 +25,19 @@ namespace API_Pelicula.Controllers
 
             var ListaUsuarios = _usuarioRepositorio.GetUsuarios();
             var ListaUsuariosDto = new List<UsuarioDto>();
-            foreach (var item in ListaUsuariosDto)
+            foreach (var item in ListaUsuarios)
             {
 
                 ListaUsuariosDto.Add(_mapper.Map<UsuarioDto>(item));
             }
             return Ok(ListaUsuariosDto);
         }
-        [HttpGet("{id:int}", Name = "GetUsuario")]
+        [HttpGet( "GetUsuario")]//"{id:int}", Name =
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult GetUsuarioId(int id)
+        public IActionResult GetUsuarioId(string id)
         {
 
             var ListaUsuario = _usuarioRepositorio.GetUsuariosId(id);
@@ -47,7 +47,7 @@ namespace API_Pelicula.Controllers
 
             ListaUsuarioDto.Add(_mapper.Map<UsuarioDto>(ListaUsuario));
 
-            return Ok();
+            return Ok(ListaUsuarioDto);
         }
         [AllowAnonymous]
         [HttpPost("Registro")]
