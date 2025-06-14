@@ -63,7 +63,8 @@ namespace API_Pelicula.Repositorio
             { return new UsuarioLoginRespuestaDto() { Token = "", usuario = null, Role = null }; }
 
             var roles = await _userManager.GetRolesAsync(usuarioLogueado);
-                var manejoToken = new JwtSecurityTokenHandler();
+            string rolesConcatenados = string.Join(",", roles);
+            var manejoToken = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(_claveSecreta);
                 var tokenDescription = new SecurityTokenDescriptor
                 {
@@ -81,8 +82,8 @@ namespace API_Pelicula.Repositorio
             {
                 Token = manejoToken.WriteToken(Token),
                 usuario = _mapper.Map<UsuarioDatosDto>(usuarioLogueado),
-               //Role = roles.Select(x=>x.)
-                
+               Role = rolesConcatenados
+
             };
             return response;
         }
