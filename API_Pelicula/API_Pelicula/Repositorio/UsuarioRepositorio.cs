@@ -81,7 +81,7 @@ namespace API_Pelicula.Repositorio
             {
                 Token = manejoToken.WriteToken(Token),
                 usuario = _mapper.Map<UsuarioDatosDto>(usuarioLogueado),
-               
+               //Role = roles.Select(x=>x.)
                 
             };
             return response;
