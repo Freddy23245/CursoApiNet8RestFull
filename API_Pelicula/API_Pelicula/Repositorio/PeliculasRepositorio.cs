@@ -57,11 +57,23 @@ namespace API_Pelicula.Repositorio
             return _context.Peliculas.FirstOrDefault(c => c.Id == id);
         }
 
-        public ICollection<Peliculas> GetPeliculas()
+        //V1
+        //public ICollection<Peliculas> GetPeliculas()
+        //{
+        //    return _context.Peliculas.OrderBy(c => c.Nombre).ToList();
+        //}
+        //V2
+        public ICollection<Peliculas> GetPeliculas(int PageNumber, int PageSize)
         {
-            return _context.Peliculas.OrderBy(c => c.Nombre).ToList();
+            return _context.Peliculas.OrderBy(c => c.Nombre)
+                 .Skip((PageNumber - 1) * PageSize)
+                 .Take(PageSize)
+                .ToList();
         }
-
+        public int GetTotalPeliculas()
+        {
+            return _context.Peliculas.Count();
+        }
         public bool Guardar()
         {
             return _context.SaveChanges() >= 0 ? true : false;
@@ -80,6 +92,7 @@ namespace API_Pelicula.Repositorio
             }
             return query.ToList();
         }
+
 
     }
 }

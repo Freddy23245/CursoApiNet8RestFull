@@ -20,21 +20,58 @@ namespace API_Pelicula.Controllers
             _pelRepositorio = pelRepositorio;
             _mapper = mapper;
         }
+        //V1
+        //[AllowAnonymous]
+        //[HttpGet]
+        //[ProducesResponseType(StatusCodes.Status403Forbidden)]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //public IActionResult GetPeliculas()
+        //{
+
+        //    var ListaPeliculas = _pelRepositorio.GetPeliculas();
+        //    var ListaPeliculasDto = new List<PeliculasDto>();
+        //    foreach (var item in ListaPeliculas)
+        //    {
+
+        //        ListaPeliculasDto.Add(_mapper.Map<PeliculasDto>(item));
+        //    }
+        //    return Ok(ListaPeliculasDto);
+        //}
+
+        //V2 Paginacion
         [AllowAnonymous]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult GetPeliculas()
+        public IActionResult GetPeliculas([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 2)
         {
+            try
+            {
+                var totalPeliculas = _pelRepositorio.GetTotalPeliculas();
+                var ListaPeliculas = _pelRepositorio.GetPeliculas(pageNumber, pageSize);
 
-            var ListaPeliculas = _pelRepositorio.GetPeliculas();
-            var ListaPeliculasDto = new List<PeliculasDto>();
-            foreach (var item in ListaPeliculas)
+                if(ListaPeliculas == null || !ListaPeliculas.Any())
+                {
+                    return NotFound("No se encontraron Peliculas.");
+                }
+                var peliculasDto = ListaPeliculas.Select(p => _mapper.Map<PeliculasDto>(p)).ToList();
+
+                var response = new
+                {
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(totalPeliculas / (double)pageSize),
+                    TotalItems = totalPeliculas,
+                    Items = peliculasDto
+                };
+
+                return Ok(response);
+            }
+            catch (Exception)
             {
 
-                ListaPeliculasDto.Add(_mapper.Map<PeliculasDto>(item));
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error al obtener datos de la aplicacion");
             }
-            return Ok(ListaPeliculasDto);
         }
         [AllowAnonymous]
         [HttpGet("{id:int}", Name = "GetPelicula")]
@@ -185,16 +222,23 @@ namespace API_Pelicula.Controllers
         [HttpGet("PeliculaEnCategoria")]
         public IActionResult PeliculaEnCategoria(int idCategoria)
         {
-            var listaPeliculas = _pelRepositorio.GetPeliculasEnCategorias(idCategoria);
-            if (listaPeliculas == null)
-                return NotFound();
-            var itemPeliculas = new List<PeliculasDto>();
-            foreach (var item in listaPeliculas)
+            try
             {
-                itemPeliculas.Add(_mapper.Map<PeliculasDto>(item));
+                var listaPeliculas = _pelRepositorio.GetPeliculasEnCategorias(idCategoria);
+                if (listaPeliculas == null || !listaPeliculas.Any())
+                    return NotFound($"No se Encontraron peliculas con el id de categoria {idCategoria}");
+                var itemPeliculas = listaPeliculas.Select(pelicula => _mapper.Map<PeliculasDto>(pelicula)).ToList();
+                //foreach (var item in listaPeliculas)
+                //{
+                //    itemPeliculas.Add(_mapper.Map<PeliculasDto>(item));
 
+                //}
+                return Ok(itemPeliculas);
             }
-            return Ok(itemPeliculas);
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error en recuperar datos de la aplicacion");
+            }
         }
         [HttpGet("Buscar")]
         public IActionResult BuscarPeliculas(string nombre)
@@ -202,9 +246,10 @@ namespace API_Pelicula.Controllers
             try
             {
                 var listaPeliculas = _pelRepositorio.BuscarPeliculas(nombre);
-                if (listaPeliculas.Any())
-                    return Ok(listaPeliculas);
-                return NotFound();
+                if (!listaPeliculas.Any())
+                    return NotFound($"No se Encontraron peliculas con el id de categoria {nombre}");
+                var peliculasDto = _mapper.Map<IEnumerable<PeliculasDto>>(listaPeliculas);
+                return Ok(peliculasDto);
             }
             catch (Exception)
             {
